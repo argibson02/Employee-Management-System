@@ -1,6 +1,7 @@
 const inquirer = require("inquirer");
 const fs = require("fs");
 const express = require('express');
+const mysql = require('mysql2');
 
 const makePageHead = require("./src/makePageHead.js");
 const makePageTail = require("./src/makePageTail.js");
