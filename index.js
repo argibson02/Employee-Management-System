@@ -18,13 +18,13 @@ const { resolve } = require("path");
 
 const team = [];
 
-const addQuestion = [
-    // Would you like to add a person 
+const actionQuestion = [
+    // What would you like to
     {
         type: "list",
-        name: "addEmployee",
-        message: "Who would you like to add to your team?", //
-        choices: ["Manager", "Engineer", "Intern", new inquirer.Separator(), "Finish constructing webpage."]
+        name: "action",
+        message: "What would you like to?", //
+        choices: ["view all departments", "view all roles", "view all employees", "add a department", "add a role", "add an employee", "update an employee role"]
     }
     ,
 ];
@@ -163,7 +163,7 @@ function promptIntern() {
 //============================== Add team members
 function addTeamMember() {
     inquirer
-        .prompt(addQuestion)
+        .prompt(actionQuestion)
         .then((response) => {
             let memberRole = response.addEmployee;
             if (memberRole === "Manager") {
