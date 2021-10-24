@@ -3,16 +3,6 @@ const fs = require("fs");
 const express = require('express');
 const mysql = require('mysql2');
 
-const makePageHead = require("./src/makePageHead.js");
-const makePageTail = require("./src/makePageTail.js");
-const makeEngineer = require("./src/makeEngineer.js");
-const makeManager = require("./src/makeManager.js");
-const makeIntern = require("./src/makeIntern.js");
-const makeCss = require("./src/makeCSS.js");
-
-const Intern = require("./lib/classIntern.js");
-const Engineer = require("./lib/classEngineer.js");
-const Manager = require("./lib/classManager.js");
 const { resolve } = require("path");
 
 
@@ -23,230 +13,177 @@ const actionQuestion = [
     {
         type: "list",
         name: "action",
-        message: "What would you like to?", //
-        choices: ["view all departments", "view all roles", "view all employees", "add a department", "add a role", "add an employee", "update an employee role"]
+        message: "What would you like to do?", //
+        choices: ["View all departments", "View all roles", "View all employees", "Add department", "Add role", "Add employee", "Update employee role"]
     }
-    ,
 ];
 
-const managerQuestions = [
-    // Manager prompts
+const addDepartmentQuestions = [
+    // Department prompts
     {
         type: "input",
-        name: "name",
-        message: "What is this manager's name?" //
+        name: "departmentName",
+        message: "What is the name of this new department?" //
     }
-    ,
-    {
-        type: "input",
-        name: "id",
-        message: "What is this manager's ID?" //
-    }
-    ,
-    {
-        type: "input",
-        name: "email",
-        message: "What is this manager's email?" //
-    }
-    ,
-    {
-        type: "input",
-        name: "managerOffice",
-        message: "What is this manager's office number?" //
-    }
-    ,
 ];
 
-const engineerQuestions = [
-    // < Group
-    // Engineer prompts
+const addRoleQuestions = [
+    // Role prompts
     {
         type: "input",
-        name: "name",
-        message: "What is this engineer's name?" //
+        name: "roleName",
+        message: "What is the name of this new role?" //
     }
     ,
     {
-        type: "input",
-        name: "id",
-        message: "What is this engineer's ID?" //
+        type: "input", // Int?
+        name: "roleSalary",
+        message: "What is the base salary for this new role?" //
     }
     ,
     {
-        type: "input",
-        name: "email",
-        message: "What is this engineer's email?" //
+        type: "", // How to get chose? may need to separate
+        name: "roleDepartment",
+        message: "What department is this new role under?" //
     }
-    ,
-    {
-        type: "input",
-        name: "engineerGit",
-        message: "What is this engineer's GitHub username?" //
-    }
-    ,
 ];
 
-const internQuestions = [
-    // < Group
-    // Intern prompts
+const addEmployeeQuestions = [
+    // Employee prompts
     {
         type: "input",
-        name: "name",
-        message: "What is this intern's name?" //
+        name: "employeeFirstName",
+        message: "What is the first name of this employee?" //
     }
     ,
     {
         type: "input",
-        name: "id",
-        message: "What is this intern's ID?" //
+        name: "employeeLastName",
+        message: "What is the first name of this employee?" //
     }
     ,
     {
-        type: "input",
-        name: "email",
-        message: "What is this intern's email?" //
+        type: "", // Unsure what this one means
+        name: "employeeRole",
+        message: "What is this employee's role?" //
     }
     ,
     {
-        type: "input",
-        name: "internSchool",
-        message: "What is this intern's school?" //
+        type: "", // How to get chose? may need to separate
+        name: "employeeManager",
+        message: "Who is this employee's manager, if any?" //
     }
-    ,
 ];
 
 
+//=========================== View Directories
 
-//============================ Prompts
-function promptManager() {
+function viewDepartments() {
+
+};
+
+function viewRoles() {
+
+};
+
+function viewEmployees() {
+
+};
+
+
+
+
+//============================ Editing Prompts
+function promptDepartment() {
     inquirer
-        .prompt(managerQuestions)
+        .prompt(addDepartmentQuestions)
         .then((response) => {
-            let role = { role: "Manager" };
-            response = { ...response, ...role };
-            var newMember = new Manager(response.name, response.id, response.email, response.managerOffice, response.role);
-            team.push(newMember);
+            // let role = { role: "Manager" };
+            // response = { ...response, ...role };
+            // var newMember = new Manager(response.name, response.id, response.email, response.managerOffice, response.role);
+            // team.push(newMember);
         })
         .then(() => {
-            addTeamMember();
+            chooseAction();
         });
 }
 
-function promptEngineer() {
+function promptRole() {
     inquirer
-        .prompt(engineerQuestions)
+        .prompt(addRoleQuestions)
         .then((response) => {
-            let role = { role: "Engineer" };
-            response = { ...response, ...role };
-            var newMember = new Engineer(response.name, response.id, response.email, response.engineerGit, response.role);
-            team.push(newMember);
+            // let role = { role: "Engineer" };
+            // response = { ...response, ...role };
+            // var newMember = new Engineer(response.name, response.id, response.email, response.engineerGit, response.role);
+            // team.push(newMember);
         })
         .then(() => {
-            addTeamMember();
+            chooseAction();
         });
 }
 
-function promptIntern() {
+function promptAddEmployee() {
     inquirer
-        .prompt(internQuestions)
+        .prompt(addEmployeeQuestions)
         .then((response) => {
-            let role = { role: "Intern" };
-            response = { ...response, ...role };
-            var newMember = new Intern(response.name, response.id, response.email, response.internSchool, response.role);
-            team.push(newMember);
+            // let role = { role: "Intern" };
+            // response = { ...response, ...role };
+            // var newMember = new Intern(response.name, response.id, response.email, response.internSchool, response.role);
+            // team.push(newMember);
         })
         .then(() => {
-            addTeamMember();
+            chooseAction();
+        });
+
+}
+
+function promptUpdateEmployee() {
+    inquirer
+        .prompt(addEmployeeQuestions)
+        .then((response) => {
+            // let role = { role: "Intern" };
+            // response = { ...response, ...role };
+            // var newMember = new Intern(response.name, response.id, response.email, response.internSchool, response.role);
+            // team.push(newMember);
+        })
+        .then(() => {
+            chooseAction();
         });
 }
 
-//============================== Add team members
-function addTeamMember() {
+
+//============================== Action selection
+function chooseAction() {
     inquirer
         .prompt(actionQuestion)
         .then((response) => {
-            let memberRole = response.addEmployee;
-            if (memberRole === "Manager") {
-                promptManager();
+            let actionSelected = response.action;
+            if (actionSelected === "View all departments") {
+                viewDepartments();
             }
-            else if (memberRole === "Engineer") {
-                promptEngineer();
+            else if (actionSelected === "View all roles") {
+                viewRoles();
             }
-            else if (memberRole === "Intern") {
-                promptIntern();
+            else if (actionSelected === "View all employees") {
+                viewEmployees();
             }
-            else if (memberRole === "Finish constructing webpage.") {
-                finalize();
+            else if (actionSelected === "Add department") {
+                promptDepartment();
+            }
+            else if (actionSelected === "Add role") {
+                promptRole();
+            }
+            else if (actionSelected === "Add employee") {
+                promptAddEmployee();
+            }
+            else if (actionSelected === "Update employee role") {
+                promptUpdateEmployee();
             }
         });
 }
 
-
-//=================================== Create All Cards
-function createAllCards() {
-    for (i = 0; i < team.length; i++) {
-        if (team[i].role === "Manager") {
-            var newMember = [team[i].name, team[i].id, team[i].email, team[i].managerOffice, team[i].role];
-            let addCard = makeManager(newMember);
-            fs.appendFile("./dist/teamPage.html", addCard, (err) => {
-                if (err) {
-                    console.error(err);
-                }
-            });
-        }
-        if (team[i].role === "Engineer") {
-            var newMember = [team[i].name, team[i].id, team[i].email, team[i].engineerGit, team[i].role];
-            let addCard = makeEngineer(newMember);
-            fs.appendFile("./dist/teamPage.html", addCard, (err) => {
-                if (err) {
-                    console.error(err);
-                }
-            });
-        }
-        if (team[i].role === "Intern") {
-            var newMember = [team[i].name, team[i].id, team[i].email, team[i].internSchool, team[i].role];
-            let addCard = makeIntern(newMember);
-            fs.appendFile("./dist/teamPage.html", addCard, (err) => {
-                if (err) {
-                    console.error(err);
-                }
-            });
-        }
-    }
-}
-
-
-//==================================== Create HTML cards and tail
-function finalize() {
-    function renderCards() {
-        return new Promise(resolve => {
-            setTimeout(() => {
-            resolve(createAllCards());
-            }, 1500);
-        });
-    }
-    
-    async function renderTail() {
-       await renderCards(); 
-        fs.appendFile("./dist/teamPage.html", makePageTail(), (err) => {
-            err ? console.error(err) : console.log("Success. Please check your local files for the newly created webpage. :)");
-        })
-    }
-    renderTail();
-}
-
-//============================================= Initialization and page write
-function writeFile(fileName, data,) {
-    fs.writeFile(fileName, data, (err) => {
-        if (err) {
-            console.error(err);
-        }
-    });
-}
 
 function initialize() {
-    writeFile("./dist/teamPage.html", makePageHead());
-    writeFile("./dist/teamPageCss.css", makeCss());
-    addTeamMember();
+    chooseAction();
 }
 initialize();
