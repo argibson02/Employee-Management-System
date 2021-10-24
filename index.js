@@ -6,7 +6,9 @@ const mysql = require('mysql2');
 const { resolve } = require("path");
 
 
-const team = [];
+const departmentList = [];
+const managerList = [];
+const roleList = [];
 
 const actionQuestion = [
     // What would you like to
@@ -36,15 +38,17 @@ const addRoleQuestions = [
     }
     ,
     {
-        type: "input", // Int?
+        type: "number", // Int?
         name: "roleSalary",
-        message: "What is the base salary for this new role?" //
+        message: "What is the base salary for this new role?", //
+        validate: isNumber(input)
     }
     ,
     {
-        type: "", // How to get chose? may need to separate
+        type: "list", // How to get chose? may need to separate
         name: "roleDepartment",
-        message: "What department is this new role under?" //
+        message: "What department is this new role under?",
+        choices: [...departmentList]
     }
 ];
 
@@ -63,20 +67,36 @@ const addEmployeeQuestions = [
     }
     ,
     {
-        type: "", // Unsure what this one means
+        type: "list", // Unsure what this one means
         name: "employeeRole",
-        message: "What is this employee's role?" //
+        message: "What is this employee's role?",
+        choices: [...roleList]
     }
     ,
     {
-        type: "", // How to get chose? may need to separate
+        type: "list", // How to get chose? may need to separate
         name: "employeeManager",
-        message: "Who is this employee's manager, if any?" //
+        message: "Who is this employee's manager, if any?",
+        choices: [...managerList, "None"]
     }
 ];
 
+//============================== Validations
+function isNumber(input) {
+    if (typeof(input) !== 'number') {
+        return "Salary must be a number!";
+    }
+    return true;
+}
 
-//=========================== View Directories
+
+
+
+
+
+
+
+//=========================== View Tables
 
 function viewDepartments() {
 
@@ -104,6 +124,7 @@ function promptDepartment() {
             // team.push(newMember);
         })
         .then(() => {
+            console.log("Successfully added.");
             chooseAction();
         });
 }
@@ -118,6 +139,7 @@ function promptRole() {
             // team.push(newMember);
         })
         .then(() => {
+            console.log("Successfully added.");
             chooseAction();
         });
 }
@@ -132,6 +154,7 @@ function promptAddEmployee() {
             // team.push(newMember);
         })
         .then(() => {
+            console.log("Successfully added.");
             chooseAction();
         });
 
@@ -147,6 +170,7 @@ function promptUpdateEmployee() {
             // team.push(newMember);
         })
         .then(() => {
+            console.log("Successfully updated.");
             chooseAction();
         });
 }
@@ -182,8 +206,15 @@ function chooseAction() {
         });
 }
 
+//========================== Initialization function 
+function populateLists() {
+
+
+}
+
 
 function initialize() {
+    populateLists();
     chooseAction();
 }
 initialize();
