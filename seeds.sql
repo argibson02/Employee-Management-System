@@ -6,7 +6,7 @@ VALUES  ("Engineering"),
         ("Human Resources");
 
 
-INSERT INTO role_t(title, salary)
+INSERT INTO role_t(title, salary, department_id)
 VALUES  ("Lead Engineer", 175000, 1),
         ("Software Engineer", 125000, 1),
         ("Account Manager", 160000, 2),
@@ -19,16 +19,16 @@ VALUES  ("Lead Engineer", 175000, 1),
         ("HR Associate", 65000, 5);
 
 
-INSERT INTO employee_t(fist_name, last_name, role_id, manager_id)
+INSERT INTO employee_t(first_name, last_name, role_id, manager_id)
 VALUES  ("Zinedine", "McCormick", 1, null),
         ("Reagan", "Schultes", 2, 1),
         ("Hagop", "Planck", 2, 1),
-        ("Pisti", "Skalický", 3, null),
-        ("Agnès", "Joossens", 4, 4),
+        ("Pisti", "Skalicky", 3, null),
+        ("Agnes", "Joossens", 4, 4),
         ("Ekber", "Bambach", 4, 4),
-        ("Joĉjo", "Vega", 5, null),
+        ("Jocjo", "Vega", 5, null),
         ("Beatrix", "Schulze", 6, 7),
-        ("Cathán", "Gwózdek", 6, 7),
+        ("Cathan", "Gwozdek", 6, 7),
         ("Tim", "Dean", 7, null),
         ("Colombano", "Lawrence", 8, 10),
         ("Birgit", "Obando", 8, 10),
@@ -38,13 +38,13 @@ VALUES  ("Zinedine", "McCormick", 1, null),
         ("Kaitlyn", "Cardozo", 1, null),
         ("Aroa", "McSheehy", 2, 1),
         ("Sarita", "Hayley", 2, 16),
-        ("Bertil", "Rybár", 3, null),
+        ("Bertil", "Rybar", 3, null),
         ("Llinos", "Cary", 4, 19),
         ("Barukh", "Desmond", 4, 19),
         ("Monika", "Herman", 5, null),
         ("Delia", "Samuelson", 6, 22),
-        ("Lúðvík", "Jansson", 6, 7),
-        ("Miraç", "Dixon", 7, null),
+        ("Ludvik", "Jansson", 6, 7),
+        ("Mirac", "Dixon", 7, null),
         ("Suibne", "Laukkanen", 8, 25),
         ("Feofil", "Eads", 8, 25),
         ("Caelan", "Arrighetti", 9, null),
