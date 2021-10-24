@@ -6,7 +6,6 @@ VALUES  ("Engineering"),
         ("Human Resources");
 
 
-
 INSERT INTO role_t(title, salary)
 VALUES  ("Lead Engineer", 175000, 1),
         ("Software Engineer", 125000, 1),
