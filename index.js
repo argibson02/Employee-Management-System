@@ -1,6 +1,7 @@
 const inquirer = require("inquirer");
 const fs = require("fs");
-const express = require('express');
+// const express = require('express');
+const util = require('util');
 const mysql = require('mysql2');
 const cTable = require('console.table');
 const db = mysql.createConnection({
@@ -9,6 +10,11 @@ const db = mysql.createConnection({
     password: "password",
     database: "company_db"
 });
+
+// const PORT = process.env.PORT || 3001;
+// // const app = express();
+// app.use(express.urlencoded({ extended: true }));
+// app.use(express.json());
 
 
 const { resolve } = require("path");
@@ -24,7 +30,7 @@ const actionQuestion = [
         type: "list",
         name: "action",
         message: "What would you like to do?", //
-        choices: ["View all departments", "View all roles", "View all employees", "Add department", "Add role", "Add employee", "Update employee role"]
+        choices: ["View all departments", "View all roles", "View all employees", "View all employees (detailed)", "Add department", "Add role", "Add employee", "Update employee role", "Quit"]
     }
 ];
 
@@ -91,7 +97,7 @@ const addEmployeeQuestions = [
 
 //============================== Validations
 function isNumber(input) {
-    if (typeof(input) !== 'number') {
+    if (typeof (input) !== 'number') {
         return "Salary must be a number!";
     }
     return true;
@@ -100,28 +106,71 @@ function isNumber(input) {
 
 
 
+// const promisedQuery = new Promise((file) => {
+//     db.query(file, function (err, results) {
+//         if (err) {
+//             console.error(err);
+//         }
+//     });
+// });
 
+
+// const connectionQuery = util.promisify(db.query(file, function (err, results) {
+//     if (err){
+//         console.error(err);
+//     }}));
 
 
 
 //=========================== View Tables
 
 function viewDepartments() {
-    db.query(`SELECT * FROM department_t;`);
-
-
-
-
+    db.promise().query(`SELECT * FROM department_t;`)
+        .then((results) => {
+            console.table(results[0]);
+        })
+        .catch(console.error)
+        .then(() => {
+            chooseAction();
+        })
 };
 
 function viewRoles() {
-    db.query(`SELECT * FROM role_t;`);
+    db.promise().query(`SELECT * FROM role_t;`)
+        .then((results) => {
+            console.table(results[0]);
+        })
+        .catch(console.error)
+        .then(() => {
+            chooseAction();
+        })
 };
 
 function viewEmployees() {
-    db.query(`SELECT * FROM employees_t;`);
+    db.promise().query(`SELECT * FROM employee_t;`)
+        .then((results) => {
+            console.table(results[0]);
+        })
+        .catch(console.error)
+        .then(() => {
+            chooseAction();
+        })
 };
 
+function viewEmployeesDetailed() {
+    db.promise().query(`
+        SELECT employee_t.first_name, employee_t.last_name, employee_t.manager_id, role_t.title, role_t.salary, department_name
+        FROM employee_t 
+        INNER JOIN role_t ON employee_t.role_id = role_t.id 
+        INNER JOIN department_t ON role_t.department_id = department_t.id;`)
+        .then((results) => {
+            console.table(results[0]);
+        })
+        .catch(console.error)
+        .then(() => {
+            chooseAction();
+        })
+};
 
 
 
@@ -203,6 +252,9 @@ function chooseAction() {
             else if (actionSelected === "View all employees") {
                 viewEmployees();
             }
+            else if (actionSelected === "View all employees (detailed)") {
+                viewEmployeesDetailed();
+            }
             else if (actionSelected === "Add department") {
                 promptDepartment();
             }
@@ -215,6 +267,10 @@ function chooseAction() {
             else if (actionSelected === "Update employee role") {
                 promptUpdateEmployee();
             }
+            else if (actionSelected === "Quit") {
+                console.log("Goodbye!");
+                return;
+            }
         });
 }
 
@@ -224,6 +280,11 @@ function populateLists() {
 
 }
 
+function appListen() {
+    app.listen(PORT, () =>
+        console.log(`Node is listening and available at http://localhost${PORT}/`)
+    );
+}
 
 function initialize() {
     populateLists();
