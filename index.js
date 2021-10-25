@@ -11,48 +11,10 @@ const db = mysql.createConnection({
 });
 
 
-
 const departmentList = [];
 var managerIdList = [];
 const roleList = [];
 
-//========================== Initialization functions
-function populateLists() {
-    // Populates departmentList
-    db.promise().query(`SELECT department_t.department_name FROM department_t;`)
-        .then((results) => {
-            let deptObj = results[0];
-            console.log(deptObj);
-            for (i = 0; i < deptObj.length; i++) {
-                let currentDept = deptObj[i].department_name;
-                departmentList.push(currentDept);
-            }
-            console.log(departmentList);
-        })
-
-    // Populates roleList
-    db.promise().query(`SELECT role_t.title FROM role_t;`)
-        .then((results) => {
-            let rolesObj = results[0];
-            for (i = 0; i < rolesObj.length; i++) {
-                let currentRole = rolesObj[i].title;
-                roleList.push(currentRole);
-            }
-            console.log(roleList);
-        })
-
-    // Populates managerIdList
-    db.promise().query(`SELECT employee_t.id FROM employee_t WHERE manager_id IS NULL;`)
-        .then((results) => {
-            let managerObj = results[0];
-            for (i = 0; i < managerObj.length; i++) {
-                let currentManager = managerObj[i].id;
-                managerIdList.push(currentManager);
-            }
-            managerIdList.push("None");
-            console.log(managerIdList);
-        })
-}
 
 
 const actionQuestion = [
@@ -329,7 +291,43 @@ function chooseAction() {
         });
 }
 
+//========================== Initialization functions
+function populateLists() {
+    // Populates departmentList
+    db.promise().query(`SELECT department_t.department_name FROM department_t;`)
+        .then((results) => {
+            let deptObj = results[0];
+            console.log(deptObj);
+            for (i = 0; i < deptObj.length; i++) {
+                let currentDept = deptObj[i].department_name;
+                departmentList.push(currentDept);
+            }
+            // console.log(departmentList);
+        });
 
+    // Populates roleList
+    db.promise().query(`SELECT role_t.title FROM role_t;`)
+        .then((results) => {
+            let rolesObj = results[0];
+            for (i = 0; i < rolesObj.length; i++) {
+                let currentRole = rolesObj[i].title;
+                roleList.push(currentRole);
+            }
+            // console.log(roleList);
+        });
+
+    // Populates managerIdList
+    db.promise().query(`SELECT employee_t.id FROM employee_t WHERE manager_id IS NULL;`)
+        .then((results) => {
+            let managerObj = results[0];
+            for (i = 0; i < managerObj.length; i++) {
+                let currentManager = managerObj[i].id;
+                managerIdList.push(currentManager);
+            }
+            managerIdList.push("None");
+            // console.log(managerIdList);
+        });
+}
 
 function initialize() {
     populateLists();
