@@ -115,3 +115,9 @@ VALUES (${response.roleName}, ${response.roleSalary}, ${response.roleDepartment}
 
 INSERT INTO employee_t(first_name, last_name, role_id, manager_id)
 VALUES (${response.employeeFirstName}, ${response.employeeLastName}, ${response.employeeRole}, ${response.employeeManager});
+
+
+
+INSERT INTO role_t(title, salary, department_id)
+VALUES ("test sql side", 55555, 2);
+SELECT department_t.id FROM department_t WHERE department_t.department_name = "Finance";

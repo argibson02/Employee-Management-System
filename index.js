@@ -1,6 +1,5 @@
 const inquirer = require("inquirer");
 const fs = require("fs");
-// const express = require('express');
 const util = require('util');
 const mysql = require('mysql2');
 const cTable = require('console.table');
@@ -11,17 +10,10 @@ const db = mysql.createConnection({
     database: "company_db"
 });
 
-// const PORT = process.env.PORT || 3001;
-// // const app = express();
-// app.use(express.urlencoded({ extended: true }));
-// app.use(express.json());
-
-
-const { resolve } = require("path");
 
 
 const departmentList = [];
-const managerIdList = [];
+var managerIdList = [];
 const roleList = [];
 
 const actionQuestion = [
@@ -59,7 +51,7 @@ const addRoleQuestions = [
     }
     ,
     {
-        type: "list", // How to get chose? may need to separate
+        type: "list",
         name: "roleDepartment",
         message: "What department is this new role under?",
         choices: departmentList
@@ -81,15 +73,15 @@ const addEmployeeQuestions = [
     }
     ,
     {
-        type: "list", // Unsure what this one means
+        type: "list",
         name: "employeeRole",
         message: "What is this employee's role?",
         choices: roleList
     }
     ,
     {
-        type: "list", // How to get chose? may need to separate
-        name: "employeeManager",
+        type: "list",
+        name: "employeeManagerId",
         message: "Who is this employee's manager, if any?",
         choices: managerIdList
     }
@@ -104,26 +96,8 @@ function isNumber(input) {
 }
 
 
-
-
-// const promisedQuery = new Promise((file) => {
-//     db.query(file, function (err, results) {
-//         if (err) {
-//             console.error(err);
-//         }
-//     });
-// });
-
-
-// const connectionQuery = util.promisify(db.query(file, function (err, results) {
-//     if (err){
-//         console.error(err);
-//     }}));
-
-
-
-//=========================== View Tables
-
+//============================== View Tables
+//=== View Dept
 function viewDepartments() {
     db.promise().query(`SELECT * FROM department_t;`)
         .then((results) => {
@@ -135,6 +109,7 @@ function viewDepartments() {
         })
 };
 
+//=== View Roles
 function viewRoles() {
     db.promise().query(`SELECT * FROM role_t;`)
         .then((results) => {
@@ -146,6 +121,7 @@ function viewRoles() {
         })
 };
 
+//=== View Employees
 function viewEmployees() {
     db.promise().query(`SELECT * FROM employee_t;`)
         .then((results) => {
@@ -157,6 +133,7 @@ function viewEmployees() {
         })
 };
 
+//=== View Employees, Detailed Version
 function viewEmployeesDetailed() {
     db.promise().query(`
         SELECT employee_t.first_name, employee_t.last_name, employee_t.manager_id, role_t.title, role_t.salary, department_name
@@ -175,6 +152,7 @@ function viewEmployeesDetailed() {
 
 
 //============================ Editing Prompts
+//=== Add Dept
 function promptDepartment() {
     inquirer
         .prompt(addDepartmentQuestions)
@@ -192,52 +170,38 @@ function promptDepartment() {
         });
 }
 
+//=== Add Role
 function promptRole() {
-    db.promise().query(`SELECT * FROM department_t;`)
-        .then((results) => {
-            let deptObj = results[0];
-            for (i = 0; i < deptObj.length; i++) {
-                let currentDept = deptObj[i].department_name;
-                departmentList.push(currentDept);
-            }
-            console.log(departmentList);
-        })
-        .catch(console.error)
-        .then(() => {
-            inquirer
-                .prompt(addRoleQuestions)
-                .then((response) => {
-                    db.promise().query(`
-                    INSERT INTO role_t(title, salary, department_id)
-                    VALUES (${response.roleName}, ${response.roleSalary}, ${response.roleDepartment});`)
-                        .then((results) => {
+    inquirer
+        .prompt(addRoleQuestions)
+        .then((response) => {
+            let roleName = response.roleName;
+            let roleSalary = response.roleSalary;
+            let roleDepartment = response.roleDepartment;
+            db.promise().query(`SELECT department_t.id FROM department_t WHERE department_t.department_name = "${roleDepartment}";`)
+                .then((results) => {
+                    let deptId = results[0];
+                    deptId = deptId[0].id;
+                    db.promise().query(`INSERT INTO role_t(title, salary, department_id) VALUES ("${roleName}", ${roleSalary}, ${deptId});`)
+                        .then(() => {
                             console.log("Successfully added.");
-                            console.table(results[0]);
                         })
                         .catch(console.error)
                         .then(() => {
                             chooseAction();
                         });
-                });
+                })
         });
 }
 
-
-//  for employees
-
-
-
-
-
-
-
+//=== Add Employee
 function promptAddEmployee() {
     inquirer
         .prompt(addEmployeeQuestions)
         .then((response) => {
             db.promise().query(`
             INSERT INTO employee_t(first_name, last_name, role_id, manager_id)
-            VALUES (${response.employeeFirstName}, ${response.employeeLastName}, ${response.employeeRole}, ${response.employeeManager});`)
+            VALUES ("${response.employeeFirstName}"", "${response.employeeLastName}", "${response.employeeRole}", ${response.employeeManagerId});`)
                 .then((results) => {
                     console.log("Successfully added.");
                     console.table(results[0]);
@@ -249,6 +213,7 @@ function promptAddEmployee() {
         })
 }
 
+//=== Update Employee
 function promptUpdateEmployee() {
     inquirer
         .prompt(addEmployeeQuestions)
@@ -297,7 +262,6 @@ function chooseAction() {
             }
             else if (actionSelected === "Quit") {
                 return console.log("Goodbye!");
-                return;
             }
         });
 }
@@ -335,7 +299,7 @@ function populateLists() {
                 let currentManager = managerObj[i].id;
                 managerIdList.push(currentManager);
             }
-            managerIdList = [...managerIdList, "None"];
+            managerIdList = [...managerIdList, 0];
             console.log(managerIdList);
         })
 }
