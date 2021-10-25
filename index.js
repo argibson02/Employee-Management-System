@@ -16,6 +16,45 @@ const departmentList = [];
 var managerIdList = [];
 const roleList = [];
 
+//========================== Initialization functions
+function populateLists() {
+    // Populates departmentList
+    db.promise().query(`SELECT department_t.department_name FROM department_t;`)
+        .then((results) => {
+            let deptObj = results[0];
+            console.log(deptObj);
+            for (i = 0; i < deptObj.length; i++) {
+                let currentDept = deptObj[i].department_name;
+                departmentList.push(currentDept);
+            }
+            console.log(departmentList);
+        })
+
+    // Populates roleList
+    db.promise().query(`SELECT role_t.title FROM role_t;`)
+        .then((results) => {
+            let rolesObj = results[0];
+            for (i = 0; i < rolesObj.length; i++) {
+                let currentRole = rolesObj[i].title;
+                roleList.push(currentRole);
+            }
+            console.log(roleList);
+        })
+
+    // Populates managerIdList
+    db.promise().query(`SELECT employee_t.id FROM employee_t WHERE manager_id IS NULL;`)
+        .then((results) => {
+            let managerObj = results[0];
+            for (i = 0; i < managerObj.length; i++) {
+                let currentManager = managerObj[i].id;
+                managerIdList.push(currentManager);
+            }
+            managerIdList.push("None");
+            console.log(managerIdList);
+        })
+}
+
+
 const actionQuestion = [
     // What would you like to
     {
@@ -82,7 +121,7 @@ const addEmployeeQuestions = [
     {
         type: "list",
         name: "employeeManagerId",
-        message: "Who is this employee's manager, if any?",
+        message: "What is the ID number of this employee's manager, if any?",
         choices: managerIdList
     }
 ];
@@ -184,13 +223,14 @@ function promptRole() {
                     deptId = deptId[0].id;
                     db.promise().query(`INSERT INTO role_t(title, salary, department_id) VALUES ("${roleName}", ${roleSalary}, ${deptId});`)
                         .then(() => {
+                            roleList.push(roleName);
                             console.log("Successfully added.");
                         })
                         .catch(console.error)
                         .then(() => {
                             chooseAction();
                         });
-                })
+                });
         });
 }
 
@@ -199,18 +239,41 @@ function promptAddEmployee() {
     inquirer
         .prompt(addEmployeeQuestions)
         .then((response) => {
-            db.promise().query(`
-            INSERT INTO employee_t(first_name, last_name, role_id, manager_id)
-            VALUES ("${response.employeeFirstName}"", "${response.employeeLastName}", "${response.employeeRole}", ${response.employeeManagerId});`)
+            let employeeFirstName = response.employeeFirstName;
+            let employeeLastName = response.employeeLastName;
+            let employeeRole = response.employeeRole;
+            let employeeManagerId = response.employeeManagerId;
+            if (employeeManagerId === "None") {
+                employeeManagerId = null;
+            }
+            db.promise().query(`SELECT role_t.id FROM role_t WHERE role_t.title = "${employeeRole}";`)
                 .then((results) => {
-                    console.log("Successfully added.");
-                    console.table(results[0]);
-                })
-                .catch(console.error)
-                .then(() => {
-                    chooseAction();
-                })
-        })
+                    let roleId = results[0];
+                    roleId = roleId[0].id;
+                    db.promise().query(`INSERT INTO employee_t(first_name, last_name, role_id, manager_id) VALUES ("${employeeFirstName}", "${employeeLastName}", ${roleId}, ${employeeManagerId});`)
+                    .then(() => {
+                            console.log("Successfully added.");
+                        })
+                        .catch(console.error)
+                        .then(() => {
+                            chooseAction();
+                        });
+                });
+        });
+
+    // inquirer
+    //     .prompt(addEmployeeQuestions)
+    //     .then((response) => {
+    //         db.promise().query(`INSERT INTO employee_t(first_name, last_name, role_id, manager_id) VALUES ("${response.employeeFirstName}"", "${response.employeeLastName}", "${response.employeeRole}", ${response.employeeManagerId});`) // need to covert employeeRole to num
+    //             .then((results) => {
+    //                 console.log("Successfully added.");
+    //                 console.table(results[0]);
+    //             })
+    //             .catch(console.error)
+    //             .then(() => {
+    //                 chooseAction();
+    //             })
+    //     })
 }
 
 //=== Update Employee
@@ -266,43 +329,7 @@ function chooseAction() {
         });
 }
 
-//========================== Initialization function 
-function populateLists() {
-    // Populates departmentList
-    db.promise().query(`SELECT department_t.department_name FROM department_t;`)
-        .then((results) => {
-            let deptObj = results[0];
-            console.log(deptObj);
-            for (i = 0; i < deptObj.length; i++) {
-                let currentDept = deptObj[i].department_name;
-                departmentList.push(currentDept);
-            }
-            console.log(departmentList);
-        })
 
-    // Populates roleList
-    db.promise().query(`SELECT role_t.title FROM role_t;`)
-        .then((results) => {
-            let rolesObj = results[0];
-            for (i = 0; i < rolesObj.length; i++) {
-                let currentRole = rolesObj[i].title;
-                roleList.push(currentRole);
-            }
-            console.log(roleList);
-        })
-
-    // Populates managerIdList
-    db.promise().query(`SELECT employee_t.id FROM employee_t WHERE manager_id IS NULL;`)
-        .then((results) => {
-            let managerObj = results[0];
-            for (i = 0; i < managerObj.length; i++) {
-                let currentManager = managerObj[i].id;
-                managerIdList.push(currentManager);
-            }
-            managerIdList = [...managerIdList, 0];
-            console.log(managerIdList);
-        })
-}
 
 function initialize() {
     populateLists();
