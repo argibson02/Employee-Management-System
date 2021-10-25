@@ -21,7 +21,7 @@ const { resolve } = require("path");
 
 
 const departmentList = [];
-const managerList = [];
+const managerIdList = [];
 const roleList = [];
 
 const actionQuestion = [
@@ -54,15 +54,15 @@ const addRoleQuestions = [
     {
         type: "number", // Int?
         name: "roleSalary",
-        message: "What is the base salary for this new role?", //
-        validate: isNumber()
+        message: "What is the base salary for this new role?" //
+        // validate: isNumber()
     }
     ,
     {
         type: "list", // How to get chose? may need to separate
         name: "roleDepartment",
         message: "What department is this new role under?",
-        choices: [...departmentList]
+        choices: departmentList
     }
 ];
 
@@ -84,14 +84,14 @@ const addEmployeeQuestions = [
         type: "list", // Unsure what this one means
         name: "employeeRole",
         message: "What is this employee's role?",
-        choices: [...roleList]
+        choices: roleList
     }
     ,
     {
         type: "list", // How to get chose? may need to separate
         name: "employeeManager",
         message: "Who is this employee's manager, if any?",
-        choices: [...managerList, "None"]
+        choices: managerIdList
     }
 ];
 
@@ -179,46 +179,74 @@ function promptDepartment() {
     inquirer
         .prompt(addDepartmentQuestions)
         .then((response) => {
-            // let role = { role: "Manager" };
-            // response = { ...response, ...role };
-            // var newMember = new Manager(response.name, response.id, response.email, response.managerOffice, response.role);
-            // team.push(newMember);
-        })
-        .then(() => {
-            console.log("Successfully added.");
-            chooseAction();
+            let newDepartment = response.departmentName;
+            db.promise().query(`INSERT INTO department_t(department_name) VALUES ("${newDepartment}");`)
+                .then(() => {
+                    departmentList.push(newDepartment)
+                    console.log("Successfully added.");
+                })
+                .catch(console.error)
+                .then(() => {
+                    chooseAction();
+                });
         });
 }
 
 function promptRole() {
-    inquirer
-        .prompt(addRoleQuestions)
-        .then((response) => {
-            // let role = { role: "Engineer" };
-            // response = { ...response, ...role };
-            // var newMember = new Engineer(response.name, response.id, response.email, response.engineerGit, response.role);
-            // team.push(newMember);
+    db.promise().query(`SELECT * FROM department_t;`)
+        .then((results) => {
+            let deptObj = results[0];
+            for (i = 0; i < deptObj.length; i++) {
+                let currentDept = deptObj[i].department_name;
+                departmentList.push(currentDept);
+            }
+            console.log(departmentList);
         })
+        .catch(console.error)
         .then(() => {
-            console.log("Successfully added.");
-            chooseAction();
+            inquirer
+                .prompt(addRoleQuestions)
+                .then((response) => {
+                    db.promise().query(`
+                    INSERT INTO role_t(title, salary, department_id)
+                    VALUES (${response.roleName}, ${response.roleSalary}, ${response.roleDepartment});`)
+                        .then((results) => {
+                            console.log("Successfully added.");
+                            console.table(results[0]);
+                        })
+                        .catch(console.error)
+                        .then(() => {
+                            chooseAction();
+                        });
+                });
         });
 }
+
+
+//  for employees
+
+
+
+
+
+
 
 function promptAddEmployee() {
     inquirer
         .prompt(addEmployeeQuestions)
         .then((response) => {
-            // let role = { role: "Intern" };
-            // response = { ...response, ...role };
-            // var newMember = new Intern(response.name, response.id, response.email, response.internSchool, response.role);
-            // team.push(newMember);
+            db.promise().query(`
+            INSERT INTO employee_t(first_name, last_name, role_id, manager_id)
+            VALUES (${response.employeeFirstName}, ${response.employeeLastName}, ${response.employeeRole}, ${response.employeeManager});`)
+                .then((results) => {
+                    console.log("Successfully added.");
+                    console.table(results[0]);
+                })
+                .catch(console.error)
+                .then(() => {
+                    chooseAction();
+                })
         })
-        .then(() => {
-            console.log("Successfully added.");
-            chooseAction();
-        });
-
 }
 
 function promptUpdateEmployee() {
@@ -268,7 +296,7 @@ function chooseAction() {
                 promptUpdateEmployee();
             }
             else if (actionSelected === "Quit") {
-                console.log("Goodbye!");
+                return console.log("Goodbye!");
                 return;
             }
         });
@@ -276,14 +304,40 @@ function chooseAction() {
 
 //========================== Initialization function 
 function populateLists() {
+    // Populates departmentList
+    db.promise().query(`SELECT department_t.department_name FROM department_t;`)
+        .then((results) => {
+            let deptObj = results[0];
+            console.log(deptObj);
+            for (i = 0; i < deptObj.length; i++) {
+                let currentDept = deptObj[i].department_name;
+                departmentList.push(currentDept);
+            }
+            console.log(departmentList);
+        })
 
+    // Populates roleList
+    db.promise().query(`SELECT role_t.title FROM role_t;`)
+        .then((results) => {
+            let rolesObj = results[0];
+            for (i = 0; i < rolesObj.length; i++) {
+                let currentRole = rolesObj[i].title;
+                roleList.push(currentRole);
+            }
+            console.log(roleList);
+        })
 
-}
-
-function appListen() {
-    app.listen(PORT, () =>
-        console.log(`Node is listening and available at http://localhost${PORT}/`)
-    );
+    // Populates managerIdList
+    db.promise().query(`SELECT employee_t.id FROM employee_t WHERE manager_id IS NULL;`)
+        .then((results) => {
+            let managerObj = results[0];
+            for (i = 0; i < managerObj.length; i++) {
+                let currentManager = managerObj[i].id;
+                managerIdList.push(currentManager);
+            }
+            managerIdList = [...managerIdList, "None"];
+            console.log(managerIdList);
+        })
 }
 
 function initialize() {

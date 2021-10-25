@@ -52,9 +52,35 @@
 --         ("Rhea", "Sitko", 10, 13);
 
 
+        type: "input",
+        name: "employeeFirstName",
+        message: "What is the first name of this employee?" //
+    }
+    ,
+    {
+        type: "input",
+        name: "employeeLastName",
+        message: "What is the first name of this employee?" //
+    }
+    ,
+    {
+        type: "list", // Unsure what this one means
+        name: "employeeRole",
+        message: "What is this employee's role?",
+        choices: [...roleList]
+    }
+    ,
+    {
+        type: "list", // How to get chose? may need to separate
+        name: "employeeManager",
+        message: "Who is this employee's manager, if any?",
+        choices: [...managerList, "None"]
+    }
+
+
 SELECT * FROM employee_t;
 SELECT * FROM employee_t JOIN role_t ON employee_t.role_id = role_t.id ;
-SELECT * FROM employee_t JOIN role_t_id, role_t.title, role_t.salary ON employee_t.role_id = role_t.id ;
+SELECT * FROM employee_t JOIN role_t_id, role_t.title, role_t.salary ON employee_t.role_id = role_t.id;
 
 SELECT employee_t.*, role_t.title, role_t.salary FROM employee_t JOIN role_t ON employee_t.role_id = role_t.id;
 
@@ -63,3 +89,29 @@ FROM employee_t
     INNER JOIN role_t ON employee_t.role_id = role_t.id 
     INNER JOIN department_t ON role_t.department_id = department_t.id;
 
+
+-- get depts
+SELECT department_name FROM department_t;
+
+--get  roles
+SELECT role_t.title FROM role_t;
+
+-- get managers
+SELECT employee_t.id, employee_t.first_name, employee_t.last_name, employee_t.role_id, role_t.title
+FROM employee_t 
+    INNER JOIN role_t ON employee_t.role_id = role_t.id
+    WHERE manager_id IS NULL;
+
+
+
+
+
+
+INSERT INTO department_t(department_name)
+VALUES (${response.departmentName});
+
+INSERT INTO role_t(title, salary, department_id)
+VALUES (${response.roleName}, ${response.roleSalary}, ${response.roleDepartment});
+
+INSERT INTO employee_t(first_name, last_name, role_id, manager_id)
+VALUES (${response.employeeFirstName}, ${response.employeeLastName}, ${response.employeeRole}, ${response.employeeManager});
