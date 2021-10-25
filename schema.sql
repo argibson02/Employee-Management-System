@@ -6,7 +6,6 @@ DROP TABLE IF EXISTS department_t;
 CREATE TABLE department_t(
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     department_name VARCHAR(30) NOT NULL
-
 );
 
 DROP TABLE IF EXISTS role_t;

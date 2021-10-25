@@ -2,6 +2,14 @@ const inquirer = require("inquirer");
 const fs = require("fs");
 const express = require('express');
 const mysql = require('mysql2');
+const cTable = require('console.table');
+const db = mysql.createConnection({
+    host: "localhost",
+    user: "root",
+    password: "password",
+    database: "company_db"
+});
+
 
 const { resolve } = require("path");
 
@@ -41,7 +49,7 @@ const addRoleQuestions = [
         type: "number", // Int?
         name: "roleSalary",
         message: "What is the base salary for this new role?", //
-        validate: isNumber(input)
+        validate: isNumber()
     }
     ,
     {
@@ -99,15 +107,19 @@ function isNumber(input) {
 //=========================== View Tables
 
 function viewDepartments() {
+    db.query(`SELECT * FROM department_t;`);
+
+
+
 
 };
 
 function viewRoles() {
-
+    db.query(`SELECT * FROM role_t;`);
 };
 
 function viewEmployees() {
-
+    db.query(`SELECT * FROM employees_t;`);
 };
 
 
