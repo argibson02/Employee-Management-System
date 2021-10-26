@@ -11,12 +11,11 @@
 
 
 ## Description
-Still writing your employee records on clay tablets in cuneiform? Try out this Employee Management system instead! This is MySQL based management system with add, view, update, and delete capabilities for employees, roles, and departments.
+Still writing your employee records on clay tablets in cuneiform? Try out this Employee Management System instead! This is MySQL based management system with add, view, update, and delete capabilities for employees, roles, and departments.
 
 
-**[Click this link WATCH the Employee Management System in action]()**
+**[Click this link WATCH the Employee Management System in action](https://watch.screencastify.com/v/t9ArJJyTC8rqW6wRb9by)**
 
-![Demo image of Employee Management System](./images/employee-management-system-demo.png)
 ![Demo GIF of Employee Management System](./images/employee-management-system-demo.gif)
 
  <br />
