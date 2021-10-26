@@ -1,6 +1,4 @@
 const inquirer = require("inquirer");
-const fs = require("fs");
-const util = require('util');
 const mysql = require('mysql2');
 const cTable = require('console.table');
 const db = mysql.createConnection({
@@ -11,19 +9,23 @@ const db = mysql.createConnection({
 });
 
 
-const departmentList = [];
+var departmentList = [];
 var managerIdList = [];
-const roleList = [];
-var employeeList = [];
-const employeeIdList = [];
+var roleList = [];
+// var employeeList = [];
+var employeeIdList = [];
 
+
+
+
+//======================================================= Inquirer Questions
 const actionQuestion = [
     // What would you like to
     {
         type: "list",
         name: "action",
         message: "What would you like to do?", //
-        choices: ["View all departments", "View all roles", "View all employees", "View all employees (detailed)", "Add department", "Add role", "Add employee", "Update employee's role", "Quit"]
+        choices: ["View all departments", "View all roles", "View all employees", "View all employees (detailed)", "Add department", "Add role", "Add employee", "Update employee's role", "Update employee's manager", "Delete department", "Delete role", "Delete employee", "Quit"]
     }
 ];
 
@@ -88,7 +90,6 @@ const addEmployeeQuestions = [
     }
 ];
 
-
 const updateEmployeeRole = [
     // Employee role update prompts
     {
@@ -106,20 +107,64 @@ const updateEmployeeRole = [
     }
 ];
 
+const updateEmployeeManager = [
+    // Employee manager update prompts
+    {
+        type: "list",
+        name: "employeeId",
+        message: "What is the ID of employee would you like to update the manager for?",
+        choices: employeeIdList
+    }
+    ,
+    {
+        type: "list",
+        name: "employeeManagerId",
+        message: "What is the ID number of this employee's manager, if any?",
+        choices: managerIdList
+    }
+];
 
+const deleteDepartment = [
+    {
+        type: "list",
+        name: "departmentName",
+        message: "What is the department would you like to delete",
+        choices: departmentList
+    }
+];
+
+const deleteRole = [
+    {
+        type: "list",
+        name: "roleName",
+        message: "What is the role would you like to delete",
+        choices: roleList
+    }
+];
+
+const deleteEmployee = [
+    {
+        type: "list",
+        name: "employeeId",
+        message: "What is the ID of employee would you like to delete",
+        choices: employeeIdList
+    }
+];
 
 
 
 //============================== Validations
-function isNumber(input) {
-    if (typeof (input) !== 'number') {
-        return "Salary must be a number!";
-    }
-    return true;
-}
+// function isNumber(input) {
+//     if (typeof (input) !== 'number') {
+//         return "Salary must be a number!";
+//     }
+//     return true;
+// } // Didn't work :/
 
 
-//============================== View Tables
+
+
+//==================================================== View Tables
 //=== View Dept
 function viewDepartments() {
     db.promise().query(`SELECT * FROM department_t;`)
@@ -174,7 +219,7 @@ function viewEmployeesDetailed() {
 
 
 
-//============================ Editing Prompts
+//======================================================== Adding Functions
 //=== Add Dept
 function promptDepartment() {
     inquirer
@@ -246,8 +291,11 @@ function promptAddEmployee() {
         });
 }
 
-//=== Update Employee
-function promptUpdateEmployee() {
+
+
+//====================================================== Update Functions
+//=== Update Employee's Role
+function promptUpdateEmployeeRole() {
     inquirer
         .prompt(updateEmployeeRole)
         .then((response) => {
@@ -259,7 +307,7 @@ function promptUpdateEmployee() {
                     roleId = roleId[0].id;
                     db.promise().query(`UPDATE employee_t SET role_id = ? WHERE employee_t.id = ?;`, [roleId, employeeId])
                         .then(() => {
-                            console.log("Successfully added.");
+                            console.log("Successfully updated.");
                         })
                         .catch(console.error)
                         .then(() => {
@@ -268,6 +316,89 @@ function promptUpdateEmployee() {
                 });
         });
 }
+
+//=== Update Employee's Manager
+function promptUpdateEmployeeManager() {
+    inquirer
+        .prompt(updateEmployeeManager)
+        .then((response) => {
+            let employeeId = response.employeeId;
+            let employeeManagerId = response.employeeManagerId;
+            db.promise().query(`UPDATE employee_t SET manager_id = ? WHERE employee_t.id = ?`, [employeeManagerId, employeeId])
+                .then(() => {
+                    console.log("Successfully updated.");
+                })
+                .catch(console.error)
+                .then(() => {
+                    chooseAction();
+                });
+        });
+}
+
+//=================================================== Delete Functions
+function promptDeleteDepartment() {
+    inquirer
+        .prompt(deleteDepartment)
+        .then((response) => {
+            let department = response.departmentName;
+            db.promise().query(`SELECT department_t.id FROM department_t WHERE department_t.department_name = ?;`, [department])
+                .then((results) => {
+                    let deptId = results[0];
+                    deptId = deptId[0].id;
+                    db.promise().query(`DELETE FROM department_t WHERE department_t.id = ?;`, [deptId])
+                        .then(() => {
+                            departmentList = departmentList.filter(name => name !== department);
+                            console.log("Successfully deleted.");
+                        })
+                        .catch(console.error)
+                        .then(() => {
+                            chooseAction();
+                        });
+                });
+        });
+}
+
+function promptDeleteRole() {
+    inquirer
+        .prompt(deleteRole)
+        .then((response) => {
+            let role = response.roleName;
+            db.promise().query(`SELECT role_t.id FROM role_t WHERE role_t.title = ?;`, [role])
+                .then((results) => {
+                    let roleId = results[0];
+                    roleId = roleId[0].id;
+                    db.promise().query(`DELETE FROM role_t WHERE role_t.id = ?;`, [roleId])
+                        .then(() => {
+                            roleList = roleList.filter(name => name !== role);
+                            console.log("Successfully deleted.");
+                        })
+                        .catch(console.error)
+                        .then(() => {
+                            chooseAction();
+                        });
+                });
+        });
+}
+
+function promptDeleteEmployee() {
+    inquirer
+        .prompt(deleteEmployee)
+        .then((response) => {
+            let employeeId = response.employeeId;
+            db.promise().query(`DELETE FROM employee_t WHERE employee_t.id = ?;`, [employeeId])
+                .then(() => {
+                    managerIdList = managerIdList.filter(name => name !== employeeId);
+                    employeeIdList = employeeIdList.filter(name => name !== employeeId);
+                    console.log("Successfully deleted.");
+                })
+                .catch(console.error)
+                .then(() => {
+                    chooseAction();
+                });
+        });
+}
+
+
 
 
 //============================== Action selection
@@ -297,8 +428,20 @@ function chooseAction() {
             else if (actionSelected === "Add employee") {
                 promptAddEmployee();
             }
+            else if (actionSelected === "Delete department") {
+                promptDeleteDepartment();
+            }
+            else if (actionSelected === "Delete role") {
+                promptDeleteRole();
+            }
+            else if (actionSelected === "Delete employee") {
+                promptDeleteEmployee();
+            }
             else if (actionSelected === "Update employee's role") {
-                promptUpdateEmployee();
+                promptUpdateEmployeeRole();
+            }
+            else if (actionSelected === "Update employee's manager") {
+                promptUpdateEmployeeManager();
             }
             else if (actionSelected === "Quit") {
                 return console.log("Goodbye!");
@@ -312,12 +455,10 @@ function populateLists() {
     db.promise().query(`SELECT department_t.department_name FROM department_t;`)
         .then((results) => {
             let deptObj = results[0];
-            // console.log(deptObj);
             for (i = 0; i < deptObj.length; i++) {
                 let currentDept = deptObj[i].department_name;
                 departmentList.push(currentDept);
             }
-            // console.log(departmentList);
         });
 
     // Populates roleList
@@ -328,7 +469,6 @@ function populateLists() {
                 let currentRole = rolesObj[i].title;
                 roleList.push(currentRole);
             }
-            // console.log(roleList);
         });
 
     // Populates managerIdList
@@ -340,19 +480,19 @@ function populateLists() {
                 managerIdList.push(currentManager);
             }
             managerIdList.push("None");
-            // console.log(managerIdList);
-        });
-    // Populates managerIdList
-    db.promise().query(`SELECT CONCAT(first_name, ' ', last_name ) AS full_name FROM employee_t;`)
-        .then((results) => {
-            let employeeObj = results[0];
-            for (i = 0; i < employeeObj.length; i++) {
-                let currentEmployee = employeeObj[i].id;
-                employeeList.push(currentEmployee);
-            }
-            // console.log(employeeList);
         });
 
+    // Populates employeeList
+    // db.promise().query(`SELECT CONCAT(first_name, ' ', last_name ) AS full_name FROM employee_t;`)
+    //     .then((results) => {
+    //         let employeeObj = results[0];
+    //         for (i = 0; i < employeeObj.length; i++) {
+    //             let currentEmployee = employeeObj[i].id;
+    //             employeeList.push(currentEmployee);
+    //         }
+    //     });
+
+    // Populates employeeIdList
     db.promise().query(`SELECT employee_t.id FROM employee_t ORDER BY id ASC;`)
         .then((results) => {
             let employeeObj = results[0];
@@ -360,9 +500,7 @@ function populateLists() {
                 let currentEmployee = employeeObj[i].id;
                 employeeIdList.push(currentEmployee);
             }
-            // console.log(employeeIdList);
         });
-
 }
 
 function initialize() {

@@ -91,6 +91,8 @@ FROM employee_t
 
 
 -- get depts
+SELECT * FROM department_t;
+
 SELECT department_name FROM department_t;
 
 --get  roles
@@ -135,3 +137,7 @@ UPDATE employee_t SET role_id = 6 WHERE employee_t.id = 2;
 SELECT * FROM employee_t;
 
 
+UPDATE employee_t SET manager_id = ? WHERE employee_t.id = ?
+
+
+DELETE FROM department_t WHERE department_t.id = 9;
