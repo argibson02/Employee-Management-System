@@ -159,7 +159,7 @@ function promptDepartment() {
         .prompt(addDepartmentQuestions)
         .then((response) => {
             let newDepartment = response.departmentName;
-            db.promise().query(`INSERT INTO department_t(department_name) VALUES ("${newDepartment}");`)
+            db.promise().query(`INSERT INTO department_t(department_name) VALUES (?);`, `${newDepartment}`)
                 .then(() => {
                     departmentList.push(newDepartment);
                     console.log("Successfully added.");
@@ -179,11 +179,11 @@ function promptRole() {
             let roleName = response.roleName;
             let roleSalary = response.roleSalary;
             let roleDepartment = response.roleDepartment;
-            db.promise().query(`SELECT department_t.id FROM department_t WHERE department_t.department_name = "${roleDepartment}";`)
+            db.promise().query(`SELECT department_t.id FROM department_t WHERE department_t.department_name = ?;`, `${roleDepartment}`)
                 .then((results) => {
                     let deptId = results[0];
                     deptId = deptId[0].id;
-                    db.promise().query(`INSERT INTO role_t(title, salary, department_id) VALUES ("${roleName}", ${roleSalary}, ${deptId});`)
+                    db.promise().query(`INSERT INTO role_t(title, salary, department_id) VALUES (?, ?, ?);`, [roleName, roleSalary, deptId])
                         .then(() => {
                             roleList.push(roleName);
                             console.log("Successfully added.");
@@ -208,11 +208,11 @@ function promptAddEmployee() {
             if (employeeManagerId === "None") {
                 employeeManagerId = null;
             }
-            db.promise().query(`SELECT role_t.id FROM role_t WHERE role_t.title = "${employeeRole}";`)
+            db.promise().query(`SELECT role_t.id FROM role_t WHERE role_t.title = ?;`, `${employeeRole}`)
                 .then((results) => {
                     let roleId = results[0];
                     roleId = roleId[0].id;
-                    db.promise().query(`INSERT INTO employee_t(first_name, last_name, role_id, manager_id) VALUES ("${employeeFirstName}", "${employeeLastName}", ${roleId}, ${employeeManagerId});`)
+                    db.promise().query(`INSERT INTO employee_t(first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?);`, [employeeFirstName, employeeLastName, roleId, employeeManagerId])
                     .then(() => {
                             console.log("Successfully added.");
                         })
@@ -283,7 +283,7 @@ function populateLists() {
     db.promise().query(`SELECT department_t.department_name FROM department_t;`)
         .then((results) => {
             let deptObj = results[0];
-            console.log(deptObj);
+            // console.log(deptObj);
             for (i = 0; i < deptObj.length; i++) {
                 let currentDept = deptObj[i].department_name;
                 departmentList.push(currentDept);
