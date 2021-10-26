@@ -121,3 +121,17 @@ VALUES (${response.employeeFirstName}, ${response.employeeLastName}, ${response.
 INSERT INTO role_t(title, salary, department_id)
 VALUES ("test sql side", 55555, 2);
 SELECT department_t.id FROM department_t WHERE department_t.department_name = "Finance";
+
+
+SELECT CONCAT(first_name, ' ', last_name ) AS full_name FROM employee_t;
+SELECT CONCAT(id, ' ', first_name, ' ', last_name ) AS full_name FROM employee_t;
+
+
+SELECT employee_t.id FROM employee_t ORDER BY id ASC;
+
+SELECT * FROM employee_t WHERE = 2;
+
+UPDATE employee_t SET role_id = 6 WHERE employee_t.id = 2;
+SELECT * FROM employee_t;
+
+

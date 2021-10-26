@@ -14,8 +14,8 @@ const db = mysql.createConnection({
 const departmentList = [];
 var managerIdList = [];
 const roleList = [];
-
-
+var employeeList = [];
+const employeeIdList = [];
 
 const actionQuestion = [
     // What would you like to
@@ -23,7 +23,7 @@ const actionQuestion = [
         type: "list",
         name: "action",
         message: "What would you like to do?", //
-        choices: ["View all departments", "View all roles", "View all employees", "View all employees (detailed)", "Add department", "Add role", "Add employee", "Update employee role", "Quit"]
+        choices: ["View all departments", "View all roles", "View all employees", "View all employees (detailed)", "Add department", "Add role", "Add employee", "Update employee's role", "Quit"]
     }
 ];
 
@@ -87,6 +87,28 @@ const addEmployeeQuestions = [
         choices: managerIdList
     }
 ];
+
+
+const updateEmployeeRole = [
+    // Employee role update prompts
+    {
+        type: "list",
+        name: "employeeId",
+        message: "What is the ID of employee would you like to update the role for?",
+        choices: employeeIdList
+    }
+    ,
+    {
+        type: "list",
+        name: "employeeRole",
+        message: "What is this employee's new role?",
+        choices: roleList
+    }
+];
+
+
+
+
 
 //============================== Validations
 function isNumber(input) {
@@ -213,7 +235,7 @@ function promptAddEmployee() {
                     let roleId = results[0];
                     roleId = roleId[0].id;
                     db.promise().query(`INSERT INTO employee_t(first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?);`, [employeeFirstName, employeeLastName, roleId, employeeManagerId])
-                    .then(() => {
+                        .then(() => {
                             console.log("Successfully added.");
                         })
                         .catch(console.error)
@@ -227,16 +249,23 @@ function promptAddEmployee() {
 //=== Update Employee
 function promptUpdateEmployee() {
     inquirer
-        .prompt(addEmployeeQuestions)
+        .prompt(updateEmployeeRole)
         .then((response) => {
-            // let role = { role: "Intern" };
-            // response = { ...response, ...role };
-            // var newMember = new Intern(response.name, response.id, response.email, response.internSchool, response.role);
-            // team.push(newMember);
-        })
-        .then(() => {
-            console.log("Successfully updated.");
-            chooseAction();
+            let employeeId = response.employeeId;
+            let employeeRole = response.employeeRole;
+            db.promise().query(`SELECT role_t.id FROM role_t WHERE role_t.title = ?;`, [employeeRole])
+                .then((results) => {
+                    let roleId = results[0];
+                    roleId = roleId[0].id;
+                    db.promise().query(`UPDATE employee_t SET role_id = ? WHERE employee_t.id = ?;`, [roleId, employeeId])
+                        .then(() => {
+                            console.log("Successfully added.");
+                        })
+                        .catch(console.error)
+                        .then(() => {
+                            chooseAction();
+                        });
+                });
         });
 }
 
@@ -268,7 +297,7 @@ function chooseAction() {
             else if (actionSelected === "Add employee") {
                 promptAddEmployee();
             }
-            else if (actionSelected === "Update employee role") {
+            else if (actionSelected === "Update employee's role") {
                 promptUpdateEmployee();
             }
             else if (actionSelected === "Quit") {
@@ -313,6 +342,27 @@ function populateLists() {
             managerIdList.push("None");
             // console.log(managerIdList);
         });
+    // Populates managerIdList
+    db.promise().query(`SELECT CONCAT(first_name, ' ', last_name ) AS full_name FROM employee_t;`)
+        .then((results) => {
+            let employeeObj = results[0];
+            for (i = 0; i < employeeObj.length; i++) {
+                let currentEmployee = employeeObj[i].id;
+                employeeList.push(currentEmployee);
+            }
+            // console.log(employeeList);
+        });
+
+    db.promise().query(`SELECT employee_t.id FROM employee_t ORDER BY id ASC;`)
+        .then((results) => {
+            let employeeObj = results[0];
+            for (i = 0; i < employeeObj.length; i++) {
+                let currentEmployee = employeeObj[i].id;
+                employeeIdList.push(currentEmployee);
+            }
+            // console.log(employeeIdList);
+        });
+
 }
 
 function initialize() {
