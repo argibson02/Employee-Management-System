@@ -161,7 +161,7 @@ function promptDepartment() {
             let newDepartment = response.departmentName;
             db.promise().query(`INSERT INTO department_t(department_name) VALUES ("${newDepartment}");`)
                 .then(() => {
-                    departmentList.push(newDepartment)
+                    departmentList.push(newDepartment);
                     console.log("Successfully added.");
                 })
                 .catch(console.error)
@@ -222,20 +222,6 @@ function promptAddEmployee() {
                         });
                 });
         });
-
-    // inquirer
-    //     .prompt(addEmployeeQuestions)
-    //     .then((response) => {
-    //         db.promise().query(`INSERT INTO employee_t(first_name, last_name, role_id, manager_id) VALUES ("${response.employeeFirstName}"", "${response.employeeLastName}", "${response.employeeRole}", ${response.employeeManagerId});`) // need to covert employeeRole to num
-    //             .then((results) => {
-    //                 console.log("Successfully added.");
-    //                 console.table(results[0]);
-    //             })
-    //             .catch(console.error)
-    //             .then(() => {
-    //                 chooseAction();
-    //             })
-    //     })
 }
 
 //=== Update Employee
