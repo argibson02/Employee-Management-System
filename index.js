@@ -17,6 +17,56 @@ var employeeIdList = [];
 
 
 
+//========================== Initialization functions
+function populateLists() {
+    // Populates departmentList
+    db.promise().query(`SELECT department_t.department_name FROM department_t;`)
+        .then((results) => {
+            let deptObj = results[0];
+            for (i = 0; i < deptObj.length; i++) {
+                let currentDept = deptObj[i].department_name;
+                departmentList.push(currentDept);
+            }
+        });
+
+    // Populates roleList
+    db.promise().query(`SELECT role_t.title FROM role_t;`)
+        .then((results) => {
+            let rolesObj = results[0];
+            for (i = 0; i < rolesObj.length; i++) {
+                let currentRole = rolesObj[i].title;
+                roleList.push(currentRole);
+            }
+        });
+
+}
+
+// Populates managerIdList
+function populateManagerIdList() {
+    db.promise().query(`SELECT employee_t.id FROM employee_t WHERE manager_id IS NULL;`)
+        .then((results) => {
+            let managerObj = results[0];
+            for (i = 0; i < managerObj.length; i++) {
+                let currentManager = managerObj[i].id;
+                managerIdList.push(currentManager);
+            }
+            managerIdList.push("None");
+        });
+}
+
+// Populates employeeIdList
+function populateEmployeeIdList() {
+    db.promise().query(`SELECT employee_t.id FROM employee_t ORDER BY id ASC;`)
+        .then((results) => {
+            let employeeObj = results[0];
+            for (i = 0; i < employeeObj.length; i++) {
+                let currentEmployee = employeeObj[i].id;
+                employeeIdList.push(currentEmployee);
+            }
+        });
+}
+
+
 
 //======================================================= Inquirer Questions
 const actionQuestion = [
@@ -282,6 +332,7 @@ function promptAddEmployee() {
                     db.promise().query(`INSERT INTO employee_t(first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?);`, [employeeFirstName, employeeLastName, roleId, employeeManagerId])
                         .then(() => {
                             console.log("Successfully added.");
+                            populateEmployeeIdList();
                         })
                         .catch(console.error)
                         .then(() => {
@@ -327,6 +378,7 @@ function promptUpdateEmployeeManager() {
             db.promise().query(`UPDATE employee_t SET manager_id = ? WHERE employee_t.id = ?`, [employeeManagerId, employeeId])
                 .then(() => {
                     console.log("Successfully updated.");
+                    populateManagerIdList();
                 })
                 .catch(console.error)
                 .then(() => {
@@ -449,6 +501,8 @@ function chooseAction() {
         });
 }
 
+
+
 //========================== Initialization functions
 function populateLists() {
     // Populates departmentList
@@ -471,7 +525,10 @@ function populateLists() {
             }
         });
 
-    // Populates managerIdList
+}
+
+// Populates managerIdList
+function populateManagerIdList() {
     db.promise().query(`SELECT employee_t.id FROM employee_t WHERE manager_id IS NULL;`)
         .then((results) => {
             let managerObj = results[0];
@@ -481,18 +538,10 @@ function populateLists() {
             }
             managerIdList.push("None");
         });
+}
 
-    // Populates employeeList
-    // db.promise().query(`SELECT CONCAT(first_name, ' ', last_name ) AS full_name FROM employee_t;`)
-    //     .then((results) => {
-    //         let employeeObj = results[0];
-    //         for (i = 0; i < employeeObj.length; i++) {
-    //             let currentEmployee = employeeObj[i].id;
-    //             employeeList.push(currentEmployee);
-    //         }
-    //     });
-
-    // Populates employeeIdList
+// Populates employeeIdList
+function populateEmployeeIdList() {
     db.promise().query(`SELECT employee_t.id FROM employee_t ORDER BY id ASC;`)
         .then((results) => {
             let employeeObj = results[0];
@@ -503,8 +552,22 @@ function populateLists() {
         });
 }
 
+
+// Populates employeeList
+// db.promise().query(`SELECT CONCAT(first_name, ' ', last_name ) AS full_name FROM employee_t;`)
+//     .then((results) => {
+//         let employeeObj = results[0];
+//         for (i = 0; i < employeeObj.length; i++) {
+//             let currentEmployee = employeeObj[i].id;
+//             employeeList.push(currentEmployee);
+//         }
+//     });
+
+
 function initialize() {
     populateLists();
+    populateEmployeeIdList();
+    populateManagerIdList();
     chooseAction();
 }
 initialize();
